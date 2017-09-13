@@ -31,6 +31,7 @@ function start() {
     .then(function(answer){
         if(answer.userchoice == "Display all products") {
             displayALL();
+            start();
         } else if (answer.userchoice == "Buy products") {
             placeOrder();
         }
