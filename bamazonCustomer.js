@@ -15,9 +15,27 @@ var connection = mysql.createConnection({
 connection.connect(function(err){
     if(err) throw err;
     console.log("Connected as ID: " + connection.threadId);
-    displayALL();
-    placeOrder();
+    start();
 });
+
+//function to ask user to buy or display products
+
+function start() {
+    inquirer
+    .prompt({
+        name: "userchoice",
+        type: "list",
+        message: " Do you want to display or buy products?",
+        choices: ["Display all products", "Buy products"]
+    })
+    .then(function(answer){
+        if(answer.userchoice == "Display all products") {
+            displayALL();
+        } else if (answer.userchoice == "Buy products") {
+            placeOrder();
+        }
+    });
+}
 
 //function to display all the data that available for sale
 function displayALL() {
@@ -27,11 +45,10 @@ function displayALL() {
         for(var i= 0; i < res.length; i++) {
             console.log(res[i].item_id, res[i].product_name, "$" + res[i].price);
         }
-        
     });
 }
 
-// main function start
+// placeorder function start
 
 function placeOrder() {
     connection.query("SELECT * FROM products", function(err, res){
@@ -74,12 +91,14 @@ function placeOrder() {
             // console.log(chosenItem);
             if(chosenItem.stock_quantity < answer.buyQuantity) {
                 console.log("Insufficient quantity!");
+                start();
             } else {
                 var newQuantity = chosenItem.stock_quantity - answer.buyQuantity;
                 connection.query("UPDATE products SET ? WHERE ?", [{stock_quantity: newQuantity}, {product_name: answer.buyName}], function(err, res){
                     if(err) throw err;
                 console.log("You've just bought " + answer.buyQuantity + " " + answer.buyName + " successfully");   
-                console.log("Your total cost is: " + answer.buyQuantity * chosenItem.price);             
+                console.log("Your total cost is: " + answer.buyQuantity * chosenItem.price);
+                start();                
                 });
             }
         });
