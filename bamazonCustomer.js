@@ -1,5 +1,8 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+var Table = require('cli-table');
+var colors = require('colors');
+
 
 //initiate connection to database
 var connection = mysql.createConnection({
@@ -42,10 +45,21 @@ function start() {
 function displayALL() {
     connection.query("SELECT * FROM products", function(err, res){
         if(err) throw err;
-        console.log("All items for sales: " + "\n");
-        for(var i= 0; i < res.length; i++) {
-            console.log(res[i].item_id, res[i].product_name, "$" + res[i].price);
+        var table = new Table({
+            head: ['ID#'.cyan, 'Product'.blue, 'Price'.blue, 'Department'.blue],
+            colWidths: [6, 50, 10, 25]
+        });
+
+        for (var i = 0; i < res.length; i++) {
+            table.push([res[i].item_id, res[i].product_name, '$' + res[i].price, res[i].department_name]);
         }
+
+        console.log('\n' + table.toString());
+
+        // console.log("All items for sales: " + "\n");
+        // for(var i= 0; i < res.length; i++) {
+        //     console.log(res[i].item_id, res[i].product_name, "$" + res[i].price);
+        // }
     });
 }
 
